@@ -4,8 +4,11 @@
 
 module FRP.Yampa.GLUT.UI 
     ( UI
-    , redisplay, reshaped
+    , redisplay, reshaped, windowSize
     , mousePosition, simpleMousePosition
+    , keyAction, mouseButtonAction, modifiers
+    , keyPressed
+    , crossed
     ) where
 
 import Control.Arrow
@@ -16,6 +19,7 @@ import FRP.Yampa.Event
 import FRP.Yampa.GLUT.InternalUI
 
 import Graphics.Rendering.OpenGL
+import Graphics.UI.GLUT.Callbacks
 
 -- | Re-display request from GLUT
 redisplay :: SF (Event UI) (Event ())
@@ -36,6 +40,7 @@ mousePosition :: SF (Event UI) Position
 mousePosition = hold (Position 0 0) <<< arr (mapFilterE f) where
     f (GlutMotion p) = Just p
     f (GlutPassiveMotion p) = Just p
+    f (GlutKeyboardMouse _ _ _ p) = Just p
     f _ = Nothing
 
 -- | Latest mouse position in window with simple coord transform (i.e. unit)
@@ -55,3 +60,34 @@ simpleMousePosition = windowSize &&& mousePosition >>> arr f where
 {-# SPECIALIZE simpleMousePosition :: SF (Event UI) (Vector2 GLdouble) #-}
 {-# SPECIALIZE simpleMousePosition :: SF (Event UI) (Vector2 Float) #-}
 {-# SPECIALIZE simpleMousePosition :: SF (Event UI) (Vector2 Double) #-}
+
+
+-- | Key action events
+keyAction :: SF (Event UI) (Event (KeyState, Either Char SpecialKey))
+keyAction = arr (mapFilterE f) where
+    f (GlutKeyboardMouse (Char c) ks _ _) = Just (ks, Left c)
+    f (GlutKeyboardMouse (SpecialKey k) ks _ _) = Just (ks, Right k)
+    f _ = Nothing
+
+-- | Mouse buttons action events
+mouseButtonAction :: SF (Event UI) (Event (KeyState, MouseButton))
+mouseButtonAction = arr (mapFilterE f) where
+    f (GlutKeyboardMouse (MouseButton mb) ks _ _) = Just (ks, mb)
+    f _ = Nothing
+
+-- | State of modifiers associated with keyboard/mouse event
+modifiers :: SF (Event UI) (Event Modifiers)
+modifiers = arr (mapFilterE f) where
+    f (GlutKeyboardMouse _ _ m _) = Just m
+    f _ = Nothing
+
+-- | Key press events
+keyPressed :: SF (Event UI) (Event (Either Char SpecialKey))
+keyPressed = keyAction >>> arr (fmap snd . filterE ((==Down) . fst))
+
+
+-- | Crossing/leaving event
+crossed :: SF (Event UI) (Event Crossing)
+crossed = arr (mapFilterE f) where
+    f (GlutCrossing c) = Just c
+    f _ = Nothing

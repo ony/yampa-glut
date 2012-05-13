@@ -53,10 +53,8 @@ adapt fini sf = do
     reshapeCallback $= Just (reactEvent . GlutReshape)
     motionCallback $= Just (reactEvent . GlutMotion)
     passiveMotionCallback $= Just (reactEvent . GlutPassiveMotion)
-
-    -- initialize continous signals
-    reactEvent (GlutReshape (Size 1 1))
-    reactEvent (GlutPassiveMotion (Position 0 0))
+    keyboardMouseCallback $= Just (\k ks m p -> reactEvent (GlutKeyboardMouse k ks m p))
+    crossingCallback $= Just (reactEvent . GlutCrossing)
 
     mainLoop
 
