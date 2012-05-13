@@ -1,0 +1,35 @@
+Name:                yampa-glut
+Version:             0.1.0
+Cabal-Version:       >= 1.2
+Synopsis:            Connects Yampa and GLUT
+Category:            FRP, graphics
+Description:
+  This package contains an adapter that connects OpenGL/GLUT to the
+  FRP library \"Yampa\".
+  .
+  &#169; 2012 by Nikolay Orlyuk; BSD3 license.
+
+Author:              Nikolay Orlyuk
+Maintainer:          virkony@gmail.com
+-- Homepage:            TODO
+-- Package-Url:         TODO
+Copyright:           (c) 2012 by Nikolay Orlyuk
+License:             GPL-2
+Stability:           experimental
+build-type:          Simple
+
+Library
+--  hs-Source-Dirs:      src
+  Extensions:
+  -- Build-Depends:       base<5, OpenGL, GLUT, vector-space, reactive >= 0.10.7
+  Build-Depends:       base<5, OpenGL, GLUT, vector-space, Yampa >= 0.9.3,
+                       newtype
+  Exposed-Modules:     
+                       FRP.Yampa.GLUT.Adapter
+                       FRP.Yampa.GLUT.UI
+  Other-Modules:
+                       FRP.Yampa.GLUT.InternalUI
+
+  ghc-options:         -Wall
+
+--  ghc-prof-options:    -prof -auto-all 
