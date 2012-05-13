@@ -1,4 +1,8 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
+
+-- Copyright   :  (c) Nikolay Orlyuk 2012
+-- License     :  GNU GPLv3 (see COPYING)
+
 module FRP.Yampa.GLUT.Adapter
     ( adaptSimple, adapt, simpleInit
     , Action, Reaction
@@ -13,7 +17,7 @@ import Data.Monoid
 
 import Graphics.UI.GLUT
 
-import FRP.Yampa (SF, reactInit, react, integral)
+import FRP.Yampa (SF, reactInit, react)
 import FRP.Yampa.Event
 
 import FRP.Yampa.GLUT.InternalUI
@@ -26,6 +30,7 @@ adaptSimple title fini sf = simpleInit title >> adapt fini sf
 
 -- | Adapter to connect @FRP.Yampa@ with @Graphics.UI.GLUT@. Assumes that
 -- GLUT have been initialized.
+adapt :: IO () -> Reaction -> IO ()
 adapt fini sf = do
     timeRef <- newIORef (0 :: Int)
 
@@ -48,13 +53,14 @@ adapt fini sf = do
 
     mainLoop
 
--- | Simple initialization of GLUT with fixe frame rate 60 fps
+-- | Simple initialization of GLUT with fixed frame rate 60 fps
+simpleInit :: String -> IO ()
 simpleInit title = do
-    getArgsAndInitialize
+    _ <- getArgsAndInitialize
     gameModeCapabilities $= [ Where' GameModeBitsPerPlane IsEqualTo 24 ]
     initialDisplayMode $= [ RGBMode, DoubleBuffered, WithDepthBuffer ]
     
-    createWindow "title"
+    _ <- createWindow title
     actionOnWindowClose $= MainLoopReturns
 
     let scheduleTick = do
