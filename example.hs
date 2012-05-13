@@ -1,5 +1,4 @@
 {-# LANGUAGE Arrows #-}
-import Control.Applicative
 import Control.Arrow
 import Data.Monoid
 

@@ -89,7 +89,7 @@ actionIO = Action . fmap (const False)
 actionExit :: Action
 actionExit = Action (return True)
 
--- | Top level reaction signul function
+-- | Top level reaction signal function
 type Reaction = SF (Event UI) (Event Action)
 
 -- Monoid instances to combine actions, reactions etc
