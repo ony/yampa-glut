@@ -3,10 +3,12 @@ import Control.Applicative
 import Control.Arrow
 import Data.Monoid
 
+import Data.VectorSpace
+
 import Graphics.UI.GLUT
 
 import FRP.Yampa.GLUT.Adapter
-import FRP.Yampa (SF, integral )
+import FRP.Yampa (SF, integral, delay, initially)
 import FRP.Yampa.Event
 import FRP.Yampa.Utilities
 
@@ -48,10 +50,12 @@ reshape sz@(Size w h) = do
 
     translate (Vector3 0 0 (-4 :: GLfloat))
 
-
 ball :: SF (Event UI) (Float, Float)
 ball = proc ev -> do
-    rec
-        let speed = (0.05, 0.05)
-        position <- integral -< speed
-    returnA -< position
+        rec
+            (Vector2 tx ty) <- simpleMousePosition -< ev
+            let mpos = (tx, ty)
+                dpos = mpos ^-^ pos
+                speed = normalized dpos ^* 0.5
+            pos <- integral <<< delay 0.2 zeroV -< speed
+        returnA -< pos

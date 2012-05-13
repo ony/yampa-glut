@@ -48,8 +48,15 @@ adapt fini sf = do
             if b then fini
                  else writeIORef timeRef time'
 
-    reshapeCallback $= Just (reactEvent . GlutReshape)
+    -- set callbacks
     displayCallback $= reactEvent GlutDisplay
+    reshapeCallback $= Just (reactEvent . GlutReshape)
+    motionCallback $= Just (reactEvent . GlutMotion)
+    passiveMotionCallback $= Just (reactEvent . GlutPassiveMotion)
+
+    -- initialize continous signals
+    reactEvent (GlutReshape (Size 1 1))
+    reactEvent (GlutPassiveMotion (Position 0 0))
 
     mainLoop
 
