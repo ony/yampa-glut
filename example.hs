@@ -1,26 +1,34 @@
 {-# LANGUAGE Arrows #-}
+import Control.Applicative
 import Control.Arrow
 import Data.Monoid
 
 import Graphics.UI.GLUT
 
 import FRP.Yampa.GLUT.Adapter
+import FRP.Yampa (SF, integral )
 import FRP.Yampa.Event
+import FRP.Yampa.Utilities
 
 
-main = adaptSimple "Simple" leaveMainLoop simple
+main = do
+    simpleInit "Simple"
+    adapt leaveMainLoop simple
 
 simple :: Reaction
 simple = proc ev -> do
-    displayAction <- arr (tagWith (actionIO display)) <<< redisplay -< ev
+    pos <- ball -< ev
+    displayAction <- arr (tagWith (actionIO . display)) <<< redisplay -< ev
     reshapedAction <- arr (fmap (actionIO . reshape)) <<< reshaped -< ev
-    returnA -< mconcat [displayAction, reshapedAction]
+    returnA -< mconcat [fmap (\f -> f pos) displayAction, reshapedAction]
 
 
-display = do
+display (x, y) = do
     clear [ ColorBuffer, DepthBuffer ]
-    
-    renderObject Solid (Teapot 1)
+
+    preservingMatrix $ do
+        translate (Vector3 (realToFrac x) (realToFrac y) (0 :: GLfloat))
+        renderObject Solid (Teapot 0.1)
 
     swapBuffers
 
@@ -33,12 +41,17 @@ reshape sz@(Size w h) = do
 
     matrixMode $= Projection
     loadIdentity
-    -- perspective 45 (w2/h2) 1 1000
     frustum (-w') w' (-h') h' 2 100
-    -- ortho2D (-width') width' (-height') height' 
 
     matrixMode $= Modelview 0
     loadIdentity
 
     translate (Vector3 0 0 (-4 :: GLfloat))
 
+
+ball :: SF (Event UI) (Float, Float)
+ball = proc ev -> do
+    rec
+        let speed = (0.05, 0.05)
+        position <- integral -< speed
+    returnA -< position
