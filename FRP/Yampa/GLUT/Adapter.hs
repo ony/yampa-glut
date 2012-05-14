@@ -36,7 +36,8 @@ adapt fini sf = do
 
     let rInit = return NoEvent
         rActuate _ _ NoEvent = return False
-        rActuate _ _ (Event (Action b)) = b
+        rActuate _ _ (Event (ActionExit io)) = io >> return True
+        rActuate _ _ (Event (ActionIO io)) = io >> return False
 
     rh <- reactInit rInit rActuate sf
 
@@ -77,29 +78,33 @@ simpleInit title = do
             scheduleTick
 
     scheduleTick
-        
+
 -- | Action to perform in response to something
-newtype Action = Action (IO Bool)
+data Action = ActionExit (IO ())
+            | ActionIO (IO ())
 
 -- | Simple IO action that do not control mainLoop life-time
 actionIO :: IO () -> Action
-actionIO = Action . fmap (const False)
+actionIO = ActionIO
 
 -- | Terminate mainLoop action
 actionExit :: Action
-actionExit = Action (return True)
+actionExit = ActionExit (return ())
 
 -- | Top level reaction signal function
 type Reaction = SF (Event UI) (Event Action)
 
 -- Monoid instances to combine actions, reactions etc
-instance Newtype Action (IO Bool) where
-    pack = Action
-    unpack (Action x) = x
+instance Newtype Action (IO ()) where
+    pack = ActionIO
+    unpack (ActionIO x) = x
+    unpack (ActionExit x) = x
 
 instance Monoid Action where
-    mempty = Action (return False)
-    a `mappend` b = Action (unpack a >>= \x -> if x then return True else unpack b)
+    mempty = ActionIO (return ())
+    a@(ActionExit _) `mappend` _ = a
+    (ActionIO a) `mappend` (ActionExit b) = ActionExit (a >> b)
+    (ActionIO a) `mappend` (ActionIO b) = ActionIO (a >> b)
 
 instance Monoid a => Monoid (Event a) where
     mempty = Event mempty
@@ -111,4 +116,3 @@ instance Monoid a => Monoid (Event a) where
 instance Monoid b => Monoid (SF a b) where
     mempty = arr mempty
     sfX `mappend` sfY = (sfX &&& sfY) >>> arr (uncurry mappend)
-

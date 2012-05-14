@@ -7,8 +7,8 @@ module FRP.Yampa.GLUT.UI
     , redisplay, reshaped, windowSize
     , mousePosition, simpleMousePosition
     , keyAction, mouseButtonAction, modifiers
-    , keyPressed
-    , crossed
+    , keyPress, keyPressed, mouseButtonPressed
+    , crossing
     ) where
 
 import Control.Arrow
@@ -82,12 +82,23 @@ modifiers = arr (mapFilterE f) where
     f _ = Nothing
 
 -- | Key press events
-keyPressed :: SF (Event UI) (Event (Either Char SpecialKey))
-keyPressed = keyAction >>> arr (fmap snd . filterE ((==Down) . fst))
+keyPress :: SF (Event UI) (Event (Either Char SpecialKey))
+keyPress = keyAction >>> arr (fmap snd . filterE ((==Down) . fst))
 
+-- | Key pressed state for specific key
+keyPressed :: Either Char SpecialKey -> SF (Event UI) Bool
+keyPressed key = hold False <<< arr (mapFilterE f) <<< keyAction where
+    f (x, key') | key == key' = Just (x == Down)
+    f _ = Nothing
+
+-- | Mouse button pressed state for specific button
+mouseButtonPressed :: MouseButton -> SF (Event UI) Bool
+mouseButtonPressed button = hold False <<< arr (mapFilterE f) <<< mouseButtonAction where
+    f (x, button') | button == button' = Just (x == Down)
+    f _ = Nothing
 
 -- | Crossing/leaving event
-crossed :: SF (Event UI) (Event Crossing)
-crossed = arr (mapFilterE f) where
+crossing :: SF (Event UI) (Event Crossing)
+crossing = arr (mapFilterE f) where
     f (GlutCrossing c) = Just c
     f _ = Nothing

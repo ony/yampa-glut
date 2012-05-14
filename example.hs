@@ -19,10 +19,9 @@ main = do
 simple :: Reaction
 simple = proc ev -> do
     pos <- ball -< ev
-    displayAction <- arr (tagWith (actionIO . display)) <<< redisplay -< ev
+    displayAction <- arr (uncurry tag) <<< first redisplay -< (ev, actionIO . display $ pos)
     reshapedAction <- arr (fmap (actionIO . reshape)) <<< reshaped -< ev
-    returnA -< mconcat [fmap (\f -> f pos) displayAction, reshapedAction]
-
+    returnA -< mconcat [displayAction, reshapedAction]
 
 display (x, y) = do
     clear [ ColorBuffer, DepthBuffer ]

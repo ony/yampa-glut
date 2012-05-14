@@ -7,7 +7,7 @@ Description:
   This package contains an adapter that connects OpenGL/GLUT to the
   FRP library \"Yampa\".
   .
-  &#169; 2012 by Nikolay Orlyuk; BSD3 license.
+  &#169; 2012 by Nikolay Orlyuk; GPL-3 license.
 
 Author:              Nikolay Orlyuk
 Maintainer:          virkony@gmail.com
