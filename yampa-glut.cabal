@@ -1,5 +1,5 @@
 Name:                yampa-glut
-Version:             0.1.0
+Version:             0.1.1
 Cabal-Version:       >= 1.6
 Synopsis:            Connects Yampa and GLUT
 Category:            FRP, graphics
@@ -17,7 +17,7 @@ License:             GPL-3
 License-File:        COPYING
 Stability:           experimental
 build-type:          Simple
-Extra-Source-Files:  example.hs
+Extra-Source-Files:  example.lhs
 
 Source-Repository head
   type:                 git

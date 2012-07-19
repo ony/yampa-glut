@@ -83,17 +83,17 @@ modifiers = arr (mapFilterE f) where
 
 -- | Key press events
 keyPress :: SF (Event UI) (Event (Either Char SpecialKey))
-keyPress = keyAction >>> arr (fmap snd . filterE ((==Down) . fst))
+keyPress = keyAction >>^ fmap snd . filterE ((==Down) . fst)
 
 -- | Key pressed state for specific key
 keyPressed :: Either Char SpecialKey -> SF (Event UI) Bool
-keyPressed key = hold False <<< arr (mapFilterE f) <<< keyAction where
+keyPressed key = hold False <<< mapFilterE f ^<< keyAction where
     f (x, key') | key == key' = Just (x == Down)
     f _ = Nothing
 
 -- | Mouse button pressed state for specific button
 mouseButtonPressed :: MouseButton -> SF (Event UI) Bool
-mouseButtonPressed button = hold False <<< arr (mapFilterE f) <<< mouseButtonAction where
+mouseButtonPressed button = hold False <<< mapFilterE f ^<< mouseButtonAction where
     f (x, button') | button == button' = Just (x == Down)
     f _ = Nothing
 

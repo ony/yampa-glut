@@ -115,4 +115,4 @@ instance Monoid a => Monoid (Event a) where
 
 instance Monoid b => Monoid (SF a b) where
     mempty = arr mempty
-    sfX `mappend` sfY = (sfX &&& sfY) >>> arr (uncurry mappend)
+    sfX `mappend` sfY = (sfX &&& sfY) >>^ uncurry mappend

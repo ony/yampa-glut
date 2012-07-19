@@ -1,4 +1,4 @@
-{-# BangPatterns #-}
+{-# LANGUAGE BangPatterns #-}
 
 -- Copyright   :  (c) Nikolay Orlyuk 2012
 -- License     :  GNU GPLv3 (see COPYING)
